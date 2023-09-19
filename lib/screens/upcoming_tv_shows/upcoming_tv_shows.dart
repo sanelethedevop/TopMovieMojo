@@ -5,24 +5,24 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:moviemojo/core/utils.dart';
 import 'package:moviemojo/screens/home/widgets/moviecard.dart';
-import 'package:moviemojo/screens/movie/view/moviescreen.dart';
+import 'package:moviemojo/screens/tvshow/view/tv_showscreen.dart';
 
 import '../../constants/tmdb_constants.dart';
 
-class UpcomingMovies extends StatefulWidget {
-  const UpcomingMovies({super.key});
+class PopularTvShows extends StatefulWidget {
+  const PopularTvShows({super.key});
 
   @override
-  State<UpcomingMovies> createState() => _UpcomingMoviesState();
+  State<PopularTvShows> createState() => _PopularTvShowsState();
 }
 
-class _UpcomingMoviesState extends State<UpcomingMovies> {
+class _PopularTvShowsState extends State<PopularTvShows> {
   List movies = [];
   int page = 1;
-  Future<Map<String, dynamic>> getUpcomingMovies() async {
+  Future<Map<String, dynamic>> getPopularTvShows() async {
     final response = await http.get(
       Uri.parse(
-          '${TMDBConstants.tmbdBaseUrl}/movie/upcoming?api_key=${TMDBConstants.tmdbApi}&page=$page'),
+          '${TMDBConstants.tmbdBaseUrl}/tv/popular?api_key=${TMDBConstants.tmdbApi}&page=$page'),
     );
     if (response.statusCode == 200) {
       final moviesRawData = jsonDecode(response.body);
@@ -38,7 +38,7 @@ class _UpcomingMoviesState extends State<UpcomingMovies> {
 
   @override
   void initState() {
-    getUpcomingMovies();
+    getPopularTvShows();
     super.initState();
   }
 
@@ -49,7 +49,7 @@ class _UpcomingMoviesState extends State<UpcomingMovies> {
     return Column(
       children: [
         ListTile(
-          title: WhiteText(text: 'New & Upcomming'),
+          title: WhiteText(text: 'Popular TV Shows'),
         ),
         Expanded(
           child: GridView.builder(
@@ -62,12 +62,12 @@ class _UpcomingMoviesState extends State<UpcomingMovies> {
                 if (movies.isNotEmpty) {
                   page++;
                   log('$page');
-                  getUpcomingMovies();
+                  getPopularTvShows();
                 }
                 return const Center(child: CircularProgressIndicator());
               } else {
                 final Map<String, dynamic> movieData = movies[index];
-                final String title = movieData['title'];
+                final String title = movieData['name'];
                 final String? posterPath = movieData['poster_path'];
                 final int movieId = movieData['id'];
                 final String posterUrl = posterPath == null
@@ -75,7 +75,7 @@ class _UpcomingMoviesState extends State<UpcomingMovies> {
                     : 'https://image.tmdb.org/t/p/w500$posterPath';
                 return InkWell(
                   onTap: () {
-                    Screen.to(context, MovieScreen(movieId: movieId));
+                    Screen.to(context, TVShowScreen(movieId: movieId));
                   },
                   child: MovieCard(
                     title: title,

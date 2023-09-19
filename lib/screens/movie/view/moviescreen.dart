@@ -59,6 +59,16 @@ class _MovieScreenState extends State<MovieScreen> {
     }
   }
 
+  String errorHandler(String snapshotError) {
+    if (snapshotError == 'Failed host lookup: \'api.themoviedb.org\'') {
+      return 'No Netowrk connection';
+    }
+    if (snapshotError == 'Software caused connection abort') {
+      return 'No Netowrk connection';
+    }
+    return 'Some unexpected Error occured';
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -148,7 +158,10 @@ class _MovieScreenState extends State<MovieScreen> {
                               const SizedBox(
                                 height: 10,
                               ),
-                              WhiteText(text: overview),
+                              WhiteText(
+                                  text: overview.length >= 20
+                                      ? '${overview.substring(0, 150)}...'
+                                      : overview),
                             ],
                           ),
                           const SizedBox(
@@ -189,6 +202,7 @@ class _MovieScreenState extends State<MovieScreen> {
                                   ),
                                 );
                               }
+
                               return const Text('Loading');
                             },
                           ),
@@ -246,8 +260,12 @@ class _MovieScreenState extends State<MovieScreen> {
             ),
           );
         }
-        return Center(
-          child: Text('${snapshot.error}'),
+
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: Text(errorHandler(snapshot.error.toString())),
+          ),
         );
       },
     );

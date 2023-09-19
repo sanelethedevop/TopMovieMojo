@@ -8,7 +8,9 @@ import 'package:moviemojo/core/utils.dart';
 import 'package:http/http.dart' as http;
 import 'package:moviemojo/screens/tvshow/view/tv_showscreen.dart';
 
+import '../../featured_movies/featured_movie_screen.dart';
 import '../../movie/view/moviescreen.dart';
+import '../../trending_movies/trending_movies.dart';
 import '../widgets/moviecard.dart';
 import '../widgets/slider_widget.dart';
 
@@ -33,10 +35,10 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<Map<String, dynamic>> getPopularMoview() async {
+  Future<Map<String, dynamic>> getNowPlayingMovies() async {
     final response = await http.get(
       Uri.parse(
-          '${TMDBConstants.tmbdBaseUrl}/movie/popular?api_key=${TMDBConstants.tmdbApi}'),
+          '${TMDBConstants.tmbdBaseUrl}/movie/now_playing?api_key=${TMDBConstants.tmdbApi}'),
     );
 
     if (response.statusCode == 200) {
@@ -46,7 +48,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<Map<String, dynamic>> getTopRatedSeries() async {
+  Future<Map<String, dynamic>> getTrendingSeries() async {
     final response = await http.get(
       Uri.parse(
           '${TMDBConstants.tmbdBaseUrl}/trending/tv/day?api_key=${TMDBConstants.tmdbApi}'),
@@ -103,7 +105,7 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             FutureBuilder(
-                future: getTopRatedSeries(),
+                future: getTrendingSeries(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
@@ -192,7 +194,9 @@ class _HomePageState extends State<HomePage> {
                             fontWeight: FontWeight.w800,
                           ),
                           trailing: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Screen.to(context, const TrendingMovies());
+                              },
                               icon: const Icon(
                                 Icons.arrow_forward_ios,
                                 color: Colors.white,
@@ -210,7 +214,7 @@ class _HomePageState extends State<HomePage> {
                   return Text(snapshot.error.toString());
                 }),
             FutureBuilder(
-                future: getPopularMoview(),
+                future: getNowPlayingMovies(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
@@ -254,7 +258,9 @@ class _HomePageState extends State<HomePage> {
                             fontWeight: FontWeight.w800,
                           ),
                           trailing: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Screen.to(context, const FeaturedMovies());
+                              },
                               icon: const Icon(
                                 Icons.arrow_forward_ios,
                                 color: Colors.white,

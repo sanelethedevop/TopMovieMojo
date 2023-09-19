@@ -36,7 +36,6 @@ class _SearchScreenState extends State<SearchScreen> {
       });
       log('$_searchResults');
     } else {
-      // Handle API error
       log('Error: ${response.reasonPhrase}');
     }
   }

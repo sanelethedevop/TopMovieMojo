@@ -39,6 +39,7 @@ dependencies:
   html: ^0.15.4
   flutter_inappwebview: ^5.7.2+3
   flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +51,11 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+
+flutter_native_splash:
+  image: "images/topmoviemojo_logo.png"
+  color: "#292c4d"
+  android_disable_fullscreen: true
 
 flutter_launcher_icons:
   android: "launcher_icon"

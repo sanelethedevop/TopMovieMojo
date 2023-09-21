@@ -15,3 +15,9 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 # TopMovieMojo
+
+## Keystore Information
+storePassword=Sanele123
+keyPassword=Sanele123
+keyAlias=moviemojo
+storeFile=//home//jamie//Projects//moviemojo//moviemojo.jks

@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:moviemojo/core/utils.dart';
 import 'package:moviemojo/screens/tvshow/player/tvseries_player.dart';
 
@@ -19,6 +21,118 @@ class TVShowScreen extends StatefulWidget {
 }
 
 class _TVShowScreenState extends State<TVShowScreen> {
+  InterstitialAd? _interstitialAd;
+  RewardedInterstitialAd? _rewardedInterstitialAd;
+  RewardedAd? _rewardedAd;
+
+  final String _interstitialAdUnitId = 'ca-app-pub-9629396337903863/5468468652';
+  final String _rewardedInterAdUnitId =
+      'ca-app-pub-9629396337903863/4479654760';
+  final String _rewardedAdUnitId = 'ca-app-pub-9629396337903863/8844359467';
+
+  bool isInterstitialAdLoaded = false;
+  bool isRewardedInterstitialAdLoaded = false;
+  bool isRewardedAdLoaded = false;
+
+  void initInterstitialAd() {
+    InterstitialAd.load(
+        adUnitId: _interstitialAdUnitId,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            _interstitialAd = ad;
+            isInterstitialAdLoaded = true;
+            ad.fullScreenContentCallback = FullScreenContentCallback(
+              onAdDismissedFullScreenContent: (ad) {
+                initInterstitialAd();
+              },
+            );
+
+            log('Inter ad loaded ${ad.onPaidEvent}, ${ad.request.keywords} , ${ad.request.extras}');
+          },
+          onAdFailedToLoad: (error) {
+            log('Ad failed to load ${error.message}');
+          },
+        ));
+  }
+
+  void initRewardedInterstitialAd() {
+    RewardedInterstitialAd.load(
+        adUnitId: _rewardedInterAdUnitId,
+        request: const AdRequest(),
+        rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            _rewardedInterstitialAd = ad;
+            isRewardedInterstitialAdLoaded = true;
+            log('Rewarded Inter AD Loaded');
+            ad.fullScreenContentCallback = FullScreenContentCallback(
+              onAdDismissedFullScreenContent: (ad) {
+                initRewardedInterstitialAd();
+              },
+            );
+          },
+          onAdFailedToLoad: (error) {
+            log('Rewarded Inter Ad Failed to load ${error.message}');
+          },
+        ));
+  }
+
+  void initRewardedAd() {
+    RewardedAd.load(
+        adUnitId: _rewardedAdUnitId,
+        request: const AdRequest(),
+        rewardedAdLoadCallback: RewardedAdLoadCallback(
+          onAdLoaded: (ad) {
+            log('Rewarded Ad Loaded');
+            ad.fullScreenContentCallback = FullScreenContentCallback(
+              onAdDismissedFullScreenContent: (ad) {
+                initRewardedAd();
+              },
+            );
+          },
+          onAdFailedToLoad: (error) {
+            log('RewardedAd Failed to load');
+          },
+        ));
+  }
+
+  void showInterAd() {
+    if (isInterstitialAdLoaded) {
+      _interstitialAd!.show();
+    }
+  }
+
+  void showRewardedInterAd() {
+    if (isRewardedInterstitialAdLoaded) {
+      _rewardedInterstitialAd!.show(
+        onUserEarnedReward: (ad, reward) {
+          log('Ad finished ${ad.responseInfo!.responseExtras}');
+        },
+      );
+    }
+  }
+
+  void showRewardedAd() {
+    if (isRewardedAdLoaded) {
+      _rewardedAd!.show(
+        onUserEarnedReward: (ad, reward) {
+          log('RewardedAd finished ${ad.responseInfo!.responseExtras}');
+        },
+      );
+    }
+  }
+
+  showRandomAdType(int randomAd) {
+    if (randomAd == 0) {
+      showInterAd();
+    }
+    if (randomAd == 1) {
+      showRewardedInterAd();
+    } else {
+      showRewardedAd();
+    }
+  }
+
   Future<Map<String, dynamic>> getSeriesDetails(int series) async {
     final response = await http.get(
       Uri.parse(
@@ -57,6 +171,14 @@ class _TVShowScreenState extends State<TVShowScreen> {
     } else {
       throw Exception('Failed to load movie details');
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initInterstitialAd();
+    initRewardedAd();
+    initRewardedInterstitialAd();
   }
 
   @override
@@ -143,6 +265,11 @@ class _TVShowScreenState extends State<TVShowScreen> {
                             margin: const EdgeInsets.symmetric(vertical: 8.0),
                             decoration: const BoxDecoration(color: Colors.blue),
                             child: ExpansionTile(
+                              onExpansionChanged: (value) {
+                                int randomAd = math.Random().nextInt(2);
+                                log('$randomAd');
+                                showRandomAdType(randomAd);
+                              },
                               title: Center(
                                 child: WhiteText(text: 'Watch for free Now'),
                               ),

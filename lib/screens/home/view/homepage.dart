@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:moviemojo/constants/tmdb_constants.dart';
 import 'package:moviemojo/core/utils.dart';
 import 'package:http/http.dart' as http;
@@ -22,6 +24,31 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  NativeAd? _nativeAd;
+  final String _nativeAdUnitId = 'ca-app-pub-9629396337903863/7423714000';
+  bool _isNativeAdLoaded = false;
+
+  initNativeAd() {
+    _nativeAd = NativeAd(
+        adUnitId: _nativeAdUnitId,
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            log('Ad Loaded');
+            setState(() {
+              _isNativeAdLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (ad, error) {
+            log('Ad failed to load ${error.message}');
+          },
+        ),
+        request: const AdRequest(),
+        nativeTemplateStyle: NativeTemplateStyle(
+            templateType: TemplateType.small,
+            mainBackgroundColor: Colors.black))
+      ..load();
+  }
+
   Future<Map<String, dynamic>> getTrendingNow() async {
     final response = await http.get(
       Uri.parse(
@@ -89,6 +116,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    initNativeAd();
+  }
+
+  @override
   void dispose() {
     timer.cancel();
     scrollController.dispose();
@@ -140,7 +173,19 @@ class _HomePageState extends State<HomePage> {
                         movies.add(movieUi);
                       }
                     }
+                    if (_isNativeAdLoaded) {
+                      int randomIndex = math.Random().nextInt(4);
+                      Widget nativeADContainer = ConstrainedBox(
+                        constraints: const BoxConstraints(
+                            minHeight: 90,
+                            minWidth: 320,
+                            maxHeight: 200,
+                            maxWidth: 400),
+                        child: AdWidget(ad: _nativeAd!),
+                      );
 
+                      movies.insert(randomIndex, nativeADContainer);
+                    }
                     startAutoScroll();
                     return SingleChildScrollView(
                       controller: scrollController,

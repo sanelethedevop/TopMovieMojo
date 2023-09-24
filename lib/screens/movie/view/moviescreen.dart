@@ -183,6 +183,14 @@ class _MovieScreenState extends State<MovieScreen> {
     }
   }
 
+  String overviewText(String overview) {
+    if (overview.characters.length >= 150) {
+      return "${overview.substring(0, 150)}...";
+    } else {
+      return overview;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -284,9 +292,8 @@ class _MovieScreenState extends State<MovieScreen> {
                                 height: 10,
                               ),
                               WhiteText(
-                                  text: overview.length >= 20
-                                      ? '${overview.substring(0, 150)}...'
-                                      : overview),
+                                text: overviewText(overview),
+                              ),
                             ],
                           ),
                           const SizedBox(

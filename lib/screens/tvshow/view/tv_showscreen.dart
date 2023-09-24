@@ -173,6 +173,14 @@ class _TVShowScreenState extends State<TVShowScreen> {
     }
   }
 
+  String overviewText(String overview) {
+    if (overview.characters.length >= 150) {
+      return "${overview.substring(0, 150)}...";
+    } else {
+      return overview;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -373,7 +381,7 @@ class _TVShowScreenState extends State<TVShowScreen> {
                                   const SizedBox(
                                     height: 3,
                                   ),
-                                  WhiteText(text: overview),
+                                  WhiteText(text: overviewText(overview)),
                                 ],
                               ),
                               const SizedBox(

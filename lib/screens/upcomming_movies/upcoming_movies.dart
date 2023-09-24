@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:http/http.dart' as http;
 import 'package:moviemojo/core/utils.dart';
 import 'package:moviemojo/screens/home/widgets/moviecard.dart';
@@ -36,8 +37,50 @@ class _UpcomingMoviesState extends State<UpcomingMovies> {
     }
   }
 
+  NativeAd? _nativeAd;
+  final String _nativeAdUnitId = 'ca-app-pub-9629396337903863/7423714000';
+  bool _isNativeAdLoaded = false;
+
+  initNativeAd() {
+    _nativeAd = NativeAd(
+        adUnitId: _nativeAdUnitId,
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            log('Ad Loaded');
+            setState(() {
+              _isNativeAdLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (ad, error) {
+            log('Ad failed to load ${error.message}');
+          },
+        ),
+        request: const AdRequest(),
+        nativeTemplateStyle: NativeTemplateStyle(
+            templateType: TemplateType.small,
+            mainBackgroundColor: Colors.black))
+      ..load();
+  }
+
+  Widget nativeBannerAd() {
+    if (_isNativeAdLoaded) {
+      Widget nativeADContainer = ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: 90,
+          minWidth: 320,
+          maxHeight: Screen.height(context) * .1,
+          maxWidth: Screen.width(context),
+        ),
+        child: AdWidget(ad: _nativeAd!),
+      );
+      return nativeADContainer;
+    }
+    return const SizedBox();
+  }
+
   @override
   void initState() {
+    initNativeAd();
     getUpcomingMovies();
     super.initState();
   }
@@ -51,6 +94,7 @@ class _UpcomingMoviesState extends State<UpcomingMovies> {
         ListTile(
           title: WhiteText(text: 'New & Upcomming'),
         ),
+        nativeBannerAd(),
         Expanded(
           child: GridView.builder(
             controller: scrollController,

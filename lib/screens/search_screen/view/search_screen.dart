@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:http/http.dart' as http;
 import 'package:moviemojo/core/utils.dart';
 import 'package:moviemojo/screens/home/widgets/moviecard.dart';
@@ -34,7 +35,6 @@ class _SearchScreenState extends State<SearchScreen> {
       setState(() {
         _searchResults = movieResultsRawData['results'];
       });
-      log('$_searchResults');
     } else {
       log('Error: ${response.reasonPhrase}');
     }
@@ -55,6 +55,53 @@ class _SearchScreenState extends State<SearchScreen> {
       log(response.body);
       throw Exception('Failed to load movie details');
     }
+  }
+
+  NativeAd? _nativeAd;
+  final String _nativeAdUnitId = 'ca-app-pub-9629396337903863/7423714000';
+  bool _isNativeAdLoaded = false;
+
+  initNativeAd() {
+    _nativeAd = NativeAd(
+        adUnitId: _nativeAdUnitId,
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            log('Ad Loaded');
+            setState(() {
+              _isNativeAdLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (ad, error) {
+            log('Ad failed to load ${error.message}');
+          },
+        ),
+        request: const AdRequest(),
+        nativeTemplateStyle: NativeTemplateStyle(
+            templateType: TemplateType.small,
+            mainBackgroundColor: Colors.black))
+      ..load();
+  }
+
+  Widget nativeBannerAd() {
+    if (_isNativeAdLoaded) {
+      Widget nativeADContainer = ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: 90,
+          minWidth: 320,
+          maxHeight: Screen.height(context) * .1,
+          maxWidth: Screen.width(context),
+        ),
+        child: AdWidget(ad: _nativeAd!),
+      );
+      return nativeADContainer;
+    }
+    return const SizedBox();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initNativeAd();
   }
 
   @override
@@ -99,7 +146,9 @@ class _SearchScreenState extends State<SearchScreen> {
               ? Column(
                   children: [
                     ListTile(
-                        title: WhiteText(text: 'Top Rated Movies of all Time')),
+                      title: WhiteText(text: 'Top Rated Movies of all Time'),
+                    ),
+                    nativeBannerAd(),
                     SingleChildScrollView(
                       child: SizedBox(
                         height: Screen.height(context),
@@ -132,6 +181,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                   moviesUI.insert(0, movieUi);
                                 }
                               }
+
                               return GridView(
                                 gridDelegate:
                                     const SliverGridDelegateWithFixedCrossAxisCount(

@@ -78,25 +78,6 @@ class _MovieScreenState extends State<MovieScreen> {
         ));
   }
 
-  void initRewardedAd() {
-    RewardedAd.load(
-        adUnitId: _rewardedAdUnitId,
-        request: const AdRequest(),
-        rewardedAdLoadCallback: RewardedAdLoadCallback(
-          onAdLoaded: (ad) {
-            log('Rewarded Ad Loaded');
-            ad.fullScreenContentCallback = FullScreenContentCallback(
-              onAdDismissedFullScreenContent: (ad) {
-                initRewardedAd();
-              },
-            );
-          },
-          onAdFailedToLoad: (error) {
-            log('RewardedAd Failed to load');
-          },
-        ));
-  }
-
   void showInterAd() {
     if (isInterstitialAdLoaded) {
       _interstitialAd!.show();
@@ -108,16 +89,6 @@ class _MovieScreenState extends State<MovieScreen> {
       _rewardedInterstitialAd!.show(
         onUserEarnedReward: (ad, reward) {
           log('Ad finished ${ad.responseInfo!.responseExtras}');
-        },
-      );
-    }
-  }
-
-  void showRewardedAd() {
-    if (isRewardedAdLoaded) {
-      _rewardedAd!.show(
-        onUserEarnedReward: (ad, reward) {
-          log('RewardedAd finished ${ad.responseInfo!.responseExtras}');
         },
       );
     }
@@ -178,8 +149,6 @@ class _MovieScreenState extends State<MovieScreen> {
     }
     if (randomAd == 1) {
       showRewardedInterAd();
-    } else {
-      showRewardedAd();
     }
   }
 
@@ -196,7 +165,6 @@ class _MovieScreenState extends State<MovieScreen> {
     super.initState();
     initInterstitialAd();
     initRewardedInterstitialAd();
-    initRewardedAd();
   }
 
   @override
@@ -264,8 +232,8 @@ class _MovieScreenState extends State<MovieScreen> {
                         Expanded(
                           child: ElevatedButton(
                               onPressed: () async {
-                                int randomAd = math.Random().nextInt(2);
-                                log('$randomAd');
+                                int randomAd = math.Random().nextInt(1);
+
                                 showRandomAdType(randomAd);
                                 Screen.to(context,
                                     MoviePlayer(movieId: widget.movieId));

@@ -77,25 +77,6 @@ class _TVShowScreenState extends State<TVShowScreen> {
         ));
   }
 
-  void initRewardedAd() {
-    RewardedAd.load(
-        adUnitId: _rewardedAdUnitId,
-        request: const AdRequest(),
-        rewardedAdLoadCallback: RewardedAdLoadCallback(
-          onAdLoaded: (ad) {
-            log('Rewarded Ad Loaded');
-            ad.fullScreenContentCallback = FullScreenContentCallback(
-              onAdDismissedFullScreenContent: (ad) {
-                initRewardedAd();
-              },
-            );
-          },
-          onAdFailedToLoad: (error) {
-            log('RewardedAd Failed to load');
-          },
-        ));
-  }
-
   void showInterAd() {
     if (isInterstitialAdLoaded) {
       _interstitialAd!.show();
@@ -112,24 +93,12 @@ class _TVShowScreenState extends State<TVShowScreen> {
     }
   }
 
-  void showRewardedAd() {
-    if (isRewardedAdLoaded) {
-      _rewardedAd!.show(
-        onUserEarnedReward: (ad, reward) {
-          log('RewardedAd finished ${ad.responseInfo!.responseExtras}');
-        },
-      );
-    }
-  }
-
   showRandomAdType(int randomAd) {
     if (randomAd == 0) {
       showInterAd();
     }
     if (randomAd == 1) {
       showRewardedInterAd();
-    } else {
-      showRewardedAd();
     }
   }
 
@@ -185,7 +154,6 @@ class _TVShowScreenState extends State<TVShowScreen> {
   void initState() {
     super.initState();
     initInterstitialAd();
-    initRewardedAd();
     initRewardedInterstitialAd();
   }
 
@@ -274,7 +242,7 @@ class _TVShowScreenState extends State<TVShowScreen> {
                             decoration: const BoxDecoration(color: Colors.blue),
                             child: ExpansionTile(
                               onExpansionChanged: (value) {
-                                int randomAd = math.Random().nextInt(2);
+                                int randomAd = math.Random().nextInt(1);
                                 log('$randomAd');
                                 showRandomAdType(randomAd);
                               },

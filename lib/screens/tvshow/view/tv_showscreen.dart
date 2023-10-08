@@ -5,30 +5,30 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:moviemojo/core/utils.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:moviemojo/screens/tvshow/player/tvseries_player.dart';
 
 import '../../../constants/tmdb_constants.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../controller/views_controller.dart';
 import '../../movie/widgets/rating_widget.dart';
 
-class TVShowScreen extends StatefulWidget {
+class TVShowScreen extends ConsumerStatefulWidget {
   const TVShowScreen({super.key, required this.movieId});
   final int movieId;
 
   @override
-  State<TVShowScreen> createState() => _TVShowScreenState();
+  ConsumerState<TVShowScreen> createState() => Consumer_TVShowScreenState();
 }
 
-class _TVShowScreenState extends State<TVShowScreen> {
+class Consumer_TVShowScreenState extends ConsumerState<TVShowScreen> {
   InterstitialAd? _interstitialAd;
   RewardedInterstitialAd? _rewardedInterstitialAd;
-  RewardedAd? _rewardedAd;
 
   final String _interstitialAdUnitId = 'ca-app-pub-9629396337903863/5468468652';
   final String _rewardedInterAdUnitId =
       'ca-app-pub-9629396337903863/4479654760';
-  final String _rewardedAdUnitId = 'ca-app-pub-9629396337903863/8844359467';
 
   bool isInterstitialAdLoaded = false;
   bool isRewardedInterstitialAdLoaded = false;
@@ -159,6 +159,7 @@ class _TVShowScreenState extends State<TVShowScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final viewsController = ref.watch(viewsControllerProvider);
     return FutureBuilder(
       future: getSeriesDetails(widget.movieId),
       builder: (context, snapshot) {
@@ -281,6 +282,8 @@ class _TVShowScreenState extends State<TVShowScreen> {
                                                   Widget episodeWidget =
                                                       InkWell(
                                                     onTap: () {
+                                                      viewsController
+                                                          .incrementViews();
                                                       Screen.to(
                                                         context,
                                                         TvSeriesPlayer(

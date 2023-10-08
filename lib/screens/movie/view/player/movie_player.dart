@@ -36,10 +36,12 @@ class _MoviePlayerState extends State<MoviePlayer> {
                 ),
               ),
               shouldOverrideUrlLoading: (controller, navigationAction) async {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text(
-                      'Pop-up ad closed, if the movie has not started, hit play again'),
-                ));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                        'Pop-up ad closed, if the movie has not started, hit play again'),
+                  ),
+                );
                 return NavigationActionPolicy.CANCEL;
               },
             );

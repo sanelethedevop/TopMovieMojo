@@ -3,7 +3,9 @@ import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:moviemojo/controller/views_controller.dart';
 import 'package:moviemojo/core/utils.dart';
 import 'package:moviemojo/screens/home/widgets/moviecard.dart';
 import 'package:moviemojo/screens/movie/view/player/movie_player.dart';
@@ -13,23 +15,21 @@ import 'package:http/http.dart' as http;
 
 import '../widgets/rating_widget.dart';
 
-class MovieScreen extends StatefulWidget {
+class MovieScreen extends ConsumerStatefulWidget {
   const MovieScreen({super.key, required this.movieId});
   final int movieId;
 
   @override
-  State<MovieScreen> createState() => _MovieScreenState();
+  ConsumerState<MovieScreen> createState() => Consumer_MovieScreenState();
 }
 
-class _MovieScreenState extends State<MovieScreen> {
+class Consumer_MovieScreenState extends ConsumerState<MovieScreen> {
   InterstitialAd? _interstitialAd;
   RewardedInterstitialAd? _rewardedInterstitialAd;
-  RewardedAd? _rewardedAd;
 
   final String _interstitialAdUnitId = 'ca-app-pub-9629396337903863/5468468652';
   final String _rewardedInterAdUnitId =
       'ca-app-pub-9629396337903863/4479654760';
-  final String _rewardedAdUnitId = 'ca-app-pub-9629396337903863/8844359467';
 
   bool isInterstitialAdLoaded = false;
   bool isRewardedInterstitialAdLoaded = false;
@@ -160,6 +160,14 @@ class _MovieScreenState extends State<MovieScreen> {
     }
   }
 
+  Future<ElevatedButton> playButtonInitialiser(
+      {required VoidCallback onPressed, required Widget child}) async {
+    Future.delayed(
+      const Duration(seconds: 2),
+    );
+    return ElevatedButton(onPressed: onPressed, child: child);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -169,6 +177,7 @@ class _MovieScreenState extends State<MovieScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final viewController = ref.watch(viewsControllerProvider);
     return FutureBuilder(
       future: getMovieDetails(widget.movieId),
       builder: (context, snapshot) {
@@ -235,6 +244,7 @@ class _MovieScreenState extends State<MovieScreen> {
                                 int randomAd = math.Random().nextInt(1);
 
                                 showRandomAdType(randomAd);
+                                viewController.incrementViews();
                                 Screen.to(context,
                                     MoviePlayer(movieId: widget.movieId));
                               },
@@ -328,14 +338,21 @@ class _MovieScreenState extends State<MovieScreen> {
                                       simillarMovie['title'];
                                   final String? moviePosterPath =
                                       simillarMovie['poster_path'];
+                                  final int movieId = simillarMovie['id'];
                                   if (moviePosterPath != null) {
                                     final String moviePoster =
                                         'https://image.tmdb.org/t/p/w500$moviePosterPath';
 
-                                    final movieWidget = MovieCard(
-                                      title: movieName,
-                                      genre: '',
-                                      posterImagePath: moviePoster,
+                                    final movieWidget = InkWell(
+                                      onTap: () {
+                                        Screen.to(context,
+                                            MovieScreen(movieId: movieId));
+                                      },
+                                      child: MovieCard(
+                                        title: movieName,
+                                        genre: '',
+                                        posterImagePath: moviePoster,
+                                      ),
                                     );
                                     simillarMoviesWidgets.add(movieWidget);
                                   }
